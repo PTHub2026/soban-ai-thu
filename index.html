@@ -100,11 +100,14 @@ footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);font-si
   function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
   var s=lsGet('sbai_sid','');
   if(!s){s='s'+Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);lsSet('sbai_sid',s);}
-  var ref='';
-  try{ref=new URLSearchParams(location.search).get('ref')||'';if(ref){ref=ref.slice(0,40);lsSet('sbai_ref',ref);}else{ref=lsGet('sbai_ref','');}}catch(e){}
+  var ref='',refTen='';
+  function refSlug(v){return String(v||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\u0111/g,'d').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,32);}
+  try{var raw=new URLSearchParams(location.search).get('ref')||'';
+      if(raw){var k=refSlug(raw); if(k){ref=k;refTen=raw.trim().slice(0,40);lsSet('sbai_ref',ref);lsSet('sbai_ref_ten',refTen);} }
+      else{ref=lsGet('sbai_ref','');refTen=lsGet('sbai_ref_ten','')||ref;}}catch(e){}
   if(ref){
     var box=document.getElementById('refbox');
-    if(box){box.textContent='Anh/chị được '+ref+' mời dùng thử';box.style.display='block';}
+    if(box){box.textContent='Anh/chị được '+(refTen||ref)+' mời dùng thử';box.style.display='block';}
     var go=document.getElementById('golink');
     if(go)go.setAttribute('href','./app.html?ref='+encodeURIComponent(ref));
   }

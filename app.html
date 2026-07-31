@@ -9,7 +9,13 @@
 }
 </script>
 <!-- v1.1 · 28/07/2026 · thay v1.0 27/07 (chuyển 99-Luu-tru): tương phản AA (--muted #898781→#6b6963, nút chính dùng accent-deep), touch target 44/38px, FAB Tạo/Quét mọi tab + sheet 2 lựa chọn (ADR-D4), cập nhật trích dẫn NĐ 254/2026 thay NĐ 70 (rule draft-08), nhãn phiên bản. -->
-<!-- BẢN DÙNG THỬ (trial) 1.3 · 31/07/2026 · theo yêu cầu Bobby, 3 việc:
+<!-- BẢN DÙNG THỬ (trial) 1.4 · 31/07/2026 · hoàn thiện phần mã người giới thiệu sau khi rà soát:
+     (a) MÃ QR ĐỘNG — trước đây QR là ảnh cố định trỏ về link gốc nên chia sẻ bằng QR thì mất dấu người mời; nay QR được sinh ngay trong máy (bộ mã hoá QR byte-mode, mức sửa lỗi M, phiên bản 1–6, không gọi mạng nên vẫn chạy offline) và mang theo ?ref=..., cập nhật ngay khi anh/chị gõ mã;
+     (b) ẢNH QR TẢI VỀ đặt tên theo mã giới thiệu, độ phân giải tự co theo kích thước mã;
+     (c) «Sao chép link» / «Chia sẻ» ở màn QR dùng chung link có mã, không còn lệch nhau;
+     (d) nút «Chưa nghĩ ra mã? Tạo giúp tôi một mã riêng» để ai cũng có mã dùng được;
+     (e) CHUẨN HOÁ MÃ — «Shop Mỹ Anh» và «shop-my-anh» về cùng một mã, mã vô nghĩa (vd «@#$») bị bỏ qua thay vì tạo dòng rác trong báo cáo.
+     BẢN DÙNG THỬ (trial) 1.3 · 31/07/2026 · theo yêu cầu Bobby, 3 việc:
      (1) MÃ NGƯỜI GIỚI THIỆU — link kèm ?ref=<mã>; app lưu lại và gắn vào mọi tín hiệu (mở app, góp ý, chấm điểm) → trang theo dõi biết ai mời ai;
          màn "Mời & chia sẻ" có ô nhập tên/mã để tự tạo link giới thiệu riêng (sao chép hoặc chia sẻ).
      (2) NÚT GÓP Ý NỔI — nút tròn 💬 ở mọi màn chính, không phải vào băng vàng nữa.
@@ -735,11 +741,14 @@ const A={scr:'login',ctx:'login',phone:'',toured:false};
 const QRM=["11111110010001111001001111111", "10000010101011111111001000001", "10111010011100001000101011101", "10111010011010100010001011101", "10111010100100010011001011101", "10000010001001111001001000001", "11111110101010101010101111111", "00000000010111010101100000000", "10101010000001001110000010010", "01101000111100001000111001001", "00110111001100100100001110111", "01110100100011011101011000010", "10101110011111011101101101011", "00001101010001100000101001001", "10100111011100001010001011011", "10100101101011101110111111010", "10101110100011111100101001011", "01001000100100001000101001101", "10111011100001000100101010011", "01000000001111110110110001010", "10110010000000101111111110000", "00000000100000001001100010111", "11111110010001001101101011011", "10000010010110000111100011000", "10111010101100001100111110000", "10111010001010001111110010111", "10111010110110000111110111001", "10000010011011001110110100010", "11111110110000111100100011011"];
 const APPURL='https://pthub2026.github.io/soban-ai-thu/';
 const API='https://soban-ai-thu-api-production.up.railway.app';
-const TRIAL={days:14,build:'trial 1.3 · 31/07/2026'};
+const TRIAL={days:14,build:'trial 1.4 · 31/07/2026'};
 function lsGet(k,d){try{return localStorage.getItem(k)||d;}catch(e){return d;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 function refCode(){
-  try{const q=new URLSearchParams(location.search).get('ref');if(q){lsSet('sbai_ref',q.slice(0,40));}}catch(e){}
+  /* chuan hoa ma gioi thieu: "Shop My Anh" va "shop-my-anh" ve cung mot ma, tranh dem trung */
+  try{const q=new URLSearchParams(location.search).get('ref');
+      if(q){const k=refSlug(q);                       /* ma khong doc duoc (vd "@#$") thi bo qua, tinh la truy cap truc tiep */
+            if(k){lsSet('sbai_ref',k); const ten=q.trim().slice(0,40); if(ten&&ten!==k) lsSet('sbai_ref_ten',ten);}}}catch(e){}
   return lsGet('sbai_ref','');
 }
 function sid(){let s=lsGet('sbai_sid','');if(!s){s='s'+Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);lsSet('sbai_sid',s);}return s;}
@@ -849,27 +858,158 @@ function showTour(i){
   c.classList.add('on');
 }
 function endTour(){document.getElementById('coach').classList.remove('on');}
-function qrSVG(px,quiet){const n=QRM.length,q=(quiet===undefined?2:quiet),t=n+q*2;
+/* QR encoder rut gon: byte mode, muc sua loi M, phien ban 1..10 — du cho link gioi thieu */
+function qrEncode(str){
+  const data = (function(s){const o=[];for(const ch of unescape(encodeURIComponent(s)))o.push(ch.charCodeAt(0));return o;})(str);
+  const SPEC = { /* v: [ec_per_block, g1_blocks, g1_dc, g2_blocks, g2_dc] */
+    1:[10,1,16,0,0], 2:[16,1,28,0,0], 3:[26,1,44,0,0], 4:[18,2,32,0,0], 5:[24,2,43,0,0],
+    6:[16,4,27,0,0], 7:[18,4,31,0,0], 8:[22,2,38,2,39], 9:[22,3,36,2,37], 10:[26,4,43,1,44] };
+  const CAP = {1:16,2:28,3:44,4:64,5:86,6:108,7:124,8:154,9:182,10:216};
+  let ver = 0;
+  for (let v=1; v<=6; v++){ const need = Math.ceil((4 + 8 + data.length*8)/8); if (need <= CAP[v]) { ver=v; break; } }
+  if (!ver) throw new Error('chuoi qua dai cho QR rut gon');
+  const [ecLen,g1,dc1,g2,dc2] = SPEC[ver];
+  const totalData = CAP[ver];
+
+  // --- bit stream ---
+  let bits = [];
+  const push = (val,len)=>{ for(let i=len-1;i>=0;i--) bits.push((val>>i)&1); };
+  push(4,4); push(data.length,8); data.forEach(b=>push(b,8));
+  const cap = totalData*8;
+  for (let i=0;i<4 && bits.length<cap;i++) bits.push(0);
+  while (bits.length % 8) bits.push(0);
+  const PAD=[0xEC,0x11]; let pi=0;
+  const bytes=[]; for(let i=0;i<bits.length;i+=8){let b=0;for(let j=0;j<8;j++)b=(b<<1)|bits[i+j];bytes.push(b);}
+  while (bytes.length < totalData) bytes.push(PAD[pi++%2]);
+
+  // --- GF(256) ---
+  const EXP=new Array(512), LOG=new Array(256);
+  for(let i=0,x=1;i<255;i++){EXP[i]=x;LOG[x]=i;x<<=1;if(x&0x100)x^=0x11D;}
+  for(let i=255;i<512;i++)EXP[i]=EXP[i-255];
+  const mul=(a,b)=> (a===0||b===0)?0:EXP[LOG[a]+LOG[b]];
+  function genPoly(n){ let g=[1]; for(let i=0;i<n;i++){ const ng=new Array(g.length+1).fill(0);
+      for(let j=0;j<g.length;j++){ ng[j]^=mul(g[j],1); ng[j+1]^=mul(g[j],EXP[i]); } g=ng; } return g; }
+  function ecFor(block,n){ const g=genPoly(n); const res=block.concat(new Array(n).fill(0));
+    for(let i=0;i<block.length;i++){ const f=res[i]; if(f===0)continue; for(let j=0;j<g.length;j++) res[i+j]^=mul(g[j],f); }
+    return res.slice(block.length); }
+
+  // --- blocks ---
+  const blocks=[], ecs=[]; let p=0;
+  for(let i=0;i<g1;i++){ const b=bytes.slice(p,p+dc1); p+=dc1; blocks.push(b); ecs.push(ecFor(b,ecLen)); }
+  for(let i=0;i<g2;i++){ const b=bytes.slice(p,p+dc2); p+=dc2; blocks.push(b); ecs.push(ecFor(b,ecLen)); }
+  const inter=[]; const maxD=Math.max(dc1,dc2||0);
+  for(let i=0;i<maxD;i++) blocks.forEach(b=>{ if(i<b.length) inter.push(b[i]); });
+  for(let i=0;i<ecLen;i++) ecs.forEach(e=>inter.push(e[i]));
+
+  // --- matrix ---
+  const size = ver*4+17;
+  const M = Array.from({length:size},()=>new Array(size).fill(null));
+  const set=(r,c,v)=>{ M[r][c]=v; };
+  const finder=(r,c)=>{ for(let i=-1;i<=7;i++)for(let j=-1;j<=7;j++){ const rr=r+i, cc=c+j; if(rr<0||cc<0||rr>=size||cc>=size)continue;
+      const on = (i>=0&&i<=6&&(j===0||j===6)) || (j>=0&&j<=6&&(i===0||i===6)) || (i>=2&&i<=4&&j>=2&&j<=4); set(rr,cc,on?1:0); } };
+  finder(0,0); finder(0,size-7); finder(size-7,0);
+  for(let i=8;i<size-8;i++){ set(6,i,i%2===0?1:0); set(i,6,i%2===0?1:0); }
+  const AL={1:[],2:[6,18],3:[6,22],4:[6,26],5:[6,30],6:[6,34],7:[6,22,38],8:[6,24,42],9:[6,26,46],10:[6,28,50]}[ver];
+  for(const r of AL) for(const c of AL){
+    if((r<=8&&c<=8)||(r<=8&&c>=size-9)||(r>=size-9&&c<=8)) continue;
+    for(let i=-2;i<=2;i++)for(let j=-2;j<=2;j++) set(r+i,c+j,(Math.abs(i)===2||Math.abs(j)===2||(i===0&&j===0))?1:0); }
+  set(size-8,8,1);                                   // dark module
+  const reserved=[]; for(let i=0;i<9;i++){reserved.push([8,i],[i,8]);} for(let i=0;i<8;i++){reserved.push([8,size-1-i],[size-1-i,8]);}
+  reserved.forEach(([r,c])=>{ if(M[r][c]===null) M[r][c]=0; });
+
+  // --- place data ---
+  const isFree=(r,c)=>M[r][c]===null;
+  const stream=[]; inter.forEach(b=>{ for(let i=7;i>=0;i--) stream.push((b>>i)&1); });
+  let idx=0, up=true;
+  for(let col=size-1; col>0; col-=2){
+    if(col===6) col--;
+    for(let k=0;k<size;k++){
+      const row = up ? size-1-k : k;
+      for(const c of [col, col-1]) if(isFree(row,c)) M[row][c] = (idx<stream.length? stream[idx++] : 0) ? 1 : 0;
+    }
+    up=!up;
+  }
+  // --- mask + format ---
+  const MASKS=[ (r,c)=>(r+c)%2===0, (r,c)=>r%2===0, (r,c)=>c%3===0, (r,c)=>(r+c)%3===0,
+    (r,c)=>(Math.floor(r/2)+Math.floor(c/3))%2===0, (r,c)=>((r*c)%2)+((r*c)%3)===0,
+    (r,c)=>(((r*c)%2)+((r*c)%3))%2===0, (r,c)=>(((r+c)%2)+((r*c)%3))%2===0 ];
+  const isFunc = Array.from({length:size},()=>new Array(size).fill(false));
+  { const t=Array.from({length:size},()=>new Array(size).fill(null));
+    const f2=(r,c)=>{for(let i=-1;i<=7;i++)for(let j=-1;j<=7;j++){const rr=r+i,cc=c+j;if(rr<0||cc<0||rr>=size||cc>=size)continue;t[rr][cc]=1;}};
+    f2(0,0); f2(0,size-7); f2(size-7,0);
+    for(let i=0;i<size;i++){t[6][i]=1;t[i][6]=1;}
+    for(const r of AL) for(const c of AL){ if((r<=8&&c<=8)||(r<=8&&c>=size-9)||(r>=size-9&&c<=8))continue;
+      for(let i=-2;i<=2;i++)for(let j=-2;j<=2;j++) t[r+i][c+j]=1; }
+    for(let i=0;i<9;i++){t[8][i]=1;t[i][8]=1;} for(let i=0;i<8;i++){t[8][size-1-i]=1;t[size-1-i][8]=1;}
+    t[size-8][8]=1;
+    for(let r=0;r<size;r++)for(let c=0;c<size;c++) isFunc[r][c]=t[r][c]===1; }
+
+  function penalty(m){
+    let s=0;
+    for(let r=0;r<size;r++){ let run=1; for(let c=1;c<size;c++){ if(m[r][c]===m[r][c-1]){run++;} else { if(run>=5)s+=3+(run-5); run=1; } } if(run>=5)s+=3+(run-5); }
+    for(let c=0;c<size;c++){ let run=1; for(let r=1;r<size;r++){ if(m[r][c]===m[r-1][c]){run++;} else { if(run>=5)s+=3+(run-5); run=1; } } if(run>=5)s+=3+(run-5); }
+    for(let r=0;r<size-1;r++)for(let c=0;c<size-1;c++){ const v=m[r][c]; if(v===m[r][c+1]&&v===m[r+1][c]&&v===m[r+1][c+1]) s+=3; }
+    const P=[1,0,1,1,1,0,1], look=(arr)=>{ let n=0; for(let i=0;i+6<arr.length;i++){ let ok=true; for(let j=0;j<7;j++) if(arr[i+j]!==P[j]){ok=false;break;}
+        if(ok){ const before=arr.slice(Math.max(0,i-4),i), after=arr.slice(i+7,i+11);
+          if(before.length===4&&before.every(x=>x===0)) n++; if(after.length===4&&after.every(x=>x===0)) n++; } } return n; };
+    for(let r=0;r<size;r++) s+=40*look(m[r]);
+    for(let c=0;c<size;c++) s+=40*look(m.map(row=>row[c]));
+    let dark=0; m.forEach(row=>row.forEach(v=>dark+=v));
+    s += 10*Math.floor(Math.abs(dark*100/(size*size)-50)/5);
+    return s;
+  }
+  const FMT_M = {0:0x5412,1:0x5125,2:0x5E7C,3:0x5B4B,4:0x45F9,5:0x40CE,6:0x4F97,7:0x4AA0};
+  let best=null, bestMask=0, bestScore=Infinity;
+  for(let mk=0;mk<8;mk++){
+    const m = M.map((row,r)=>row.map((v,c)=> isFunc[r][c] ? v : (MASKS[mk](r,c) ? v^1 : v)));
+    const fmt = FMT_M[mk];
+    for(let i=0;i<15;i++){ const bit=(fmt>>(14-i))&1;   /* dat bit cao truoc, dung chuan ISO 18004 */
+      if(i<6) m[8][i]=bit; else if(i===6) m[8][7]=bit; else if(i===7) m[8][8]=bit; else if(i===8) m[7][8]=bit; else m[14-i][8]=bit;
+      if(i<7) m[size-1-i][8]=bit; else m[8][size-15+i]=bit; }   /* ban sao 2: 7 bit dau o cot 8, 8 bit sau o hang 8 */
+    m[size-8][8]=1;
+    const sc = penalty(m);
+    if(sc<bestScore){bestScore=sc;best=m;bestMask=mk;}
+  }
+  return best.map(r=>r.join(''));
+}
+
+function qrMatrix(text){ try{ return text ? qrEncode(text) : QRM; }catch(e){ return QRM; } }
+function qrSVG(px,quiet,text){const G=qrMatrix(text),n=G.length,q=(quiet===undefined?2:quiet),t=n+q*2;
   let d='';
-  for(let y=0;y<n;y++){let x=0;while(x<n){if(QRM[y][x]==='1'){let w=1;while(x+w<n&&QRM[y][x+w]==='1')w++;d+=`M${x+q},${y+q}h${w}v1h-${w}z`;x+=w;}else x++;}}
+  for(let y=0;y<n;y++){let x=0;while(x<n){if(G[y][x]==='1'){let w=1;while(x+w<n&&G[y][x+w]==='1')w++;d+=`M${x+q},${y+q}h${w}v1h-${w}z`;x+=w;}else x++;}}
   return `<svg viewBox="0 0 ${t} ${t}" width="${px}" height="${px}" shape-rendering="crispEdges" style="display:block;width:100%;height:auto" role="img" aria-label="Mã QR tải ứng dụng Sổ Bán AI"><rect width="${t}" height="${t}" fill="#fff"/><path d="${d}" fill="#0b0b0b"/></svg>`;}
-function qrPNG(){
-  const n=QRM.length,q=2,t=n+q*2,scale=18,size=t*scale;
+function qrPNG(text){
+  const G=qrMatrix(text||refLink()),n=G.length,q=2,t=n+q*2,scale=Math.max(8,Math.round(520/(n+4))),size=t*scale;
   const c=document.createElement('canvas');c.width=size;c.height=size;
   const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,size,size);g.fillStyle='#0b0b0b';
-  for(let y=0;y<n;y++)for(let x=0;x<n;x++)if(QRM[y][x]==='1')g.fillRect((x+q)*scale,(y+q)*scale,scale,scale);
-  const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='SoBanAI-QR-tai-app.png';a.click();
-  toast('Đã tải ảnh QR — gửi cho người khác qua Zalo/Messenger là họ tải được app');
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++)if(G[y][x]==='1')g.fillRect((x+q)*scale,(y+q)*scale,scale,scale);
+  const ma=refSlug(myRef());
+  const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='SoBanAI-QR'+(ma?'-'+ma:'')+'.png';a.click();
+  toast(ma?('Đã tải ảnh QR có mã giới thiệu «'+ma+'» — ai quét mã này đều tính cho anh/chị'):'Đã tải ảnh QR — gửi qua Zalo/Messenger là họ tải được app');
 }
 function copyLink(){
-  const ok=()=>toast('Đã sao chép link tải app: '+APPURL);
-  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(APPURL).then(ok).catch(()=>{fallbackCopy();ok();});}
-  else{fallbackCopy();ok();}
+  const L=refLink();
+  const ok=()=>toast('Đã sao chép link tải app: '+L);
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(L).then(ok).catch(()=>{fallbackCopy(L);ok();});}
+  else{fallbackCopy(L);ok();}
 }
-function fallbackCopy(){const t=document.createElement('textarea');t.value=APPURL;document.body.appendChild(t);t.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(t);}
+function fallbackCopy(v){const t=document.createElement('textarea');t.value=v||refLink();document.body.appendChild(t);t.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(t);}
 function myRef(){return lsGet('sbai_myref','');}
 function refSlug(v){return String(v||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,32);}
 function refLink(){const r=refSlug(myRef());return r?APPURL+'?ref='+r:APPURL;}
+function refPreview(){
+  const el=document.getElementById('refin'); const v=refSlug(el&&el.value); lsSet('sbai_myref',v);
+  const L=refLink();
+  const a=document.getElementById('reflink'); if(a)a.textContent=L;
+  const b=document.getElementById('qrlinktxt'); if(b)b.textContent=L;
+  const c=document.getElementById('qrbig'); if(c)c.innerHTML=qrSVG(204,2,L);
+  const d=document.getElementById('qrnote'); if(d)d.textContent = v ? ('Mã QR này đã gắn mã giới thiệu «'+v+'» — ai quét đều tính cho anh/chị.') : 'Nhập mã giới thiệu bên dưới để biết ai mời được bao nhiêu người.';
+}
+function refAuto(){
+  const ma='ban-'+(sid()||'x').replace(/[^a-z0-9]/gi,'').slice(-5).toLowerCase();
+  const el=document.getElementById('refin'); if(el)el.value=ma;
+  refPreview(); toast('Đã tạo mã riêng «'+ma+'» — anh/chị đổi thành tên shop cũng được');
+}
 function readRefInput(){const el=document.getElementById('refin');const v=refSlug(el&&el.value);lsSet('sbai_myref',v);const out=document.getElementById('reflink');if(out)out.textContent=refLink();return refLink();}
 function copyRefLink(){const l=readRefInput();const done=()=>toast(l===APPURL?'Đã sao chép link (chưa nhập mã giới thiệu)':'Đã sao chép link giới thiệu: '+l);
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(l).then(done).catch(()=>{fbCopy(l);done();});}else{fbCopy(l);done();}}
@@ -878,7 +1018,7 @@ function shareRefLink(){const l=readRefInput();
   if(navigator.share){navigator.share({title:'Sổ Bán AI',text:'Mời anh/chị dùng thử Sổ Bán AI:',url:l}).then(()=>toast('Đã mở bảng chia sẻ')).catch(()=>{});}
   else{copyRefLink();}}
 function shareApp(){
-  const data={title:'Sổ Bán AI',text:'Tải Sổ Bán AI — trợ lý bán hàng đa kênh & thuế cho hộ kinh doanh:',url:APPURL};
+  const data={title:'Sổ Bán AI',text:'Tải Sổ Bán AI — trợ lý bán hàng đa kênh & thuế cho hộ kinh doanh:',url:refLink()};
   if(navigator.share){navigator.share(data).then(()=>toast('Đã mở bảng chia sẻ')).catch(()=>{});}
   else{copyLink();}
 }
@@ -900,15 +1040,17 @@ function renderAuth(){
     <button class="alink" style="margin:2px auto 0" onclick="installSheet()">Cách cài lên màn hình chính ›</button>
     <a class="alink" style="margin:0 auto;display:block;text-align:center;text-decoration:none" href="./">‹ Về trang giới thiệu</a>`,
   qr:`<h1 style="margin-top:52px">Mã QR tải app</h1><div class="asub">Cho người khác quét mã này để tải Sổ Bán AI — hoặc xuất ảnh gửi qua Zalo, Messenger, in dán tại cửa hàng.</div>
-    <div class="qrbig">${qrSVG(204)}</div>
-    <div class="qrlink">${APPURL}</div>
+    <div class="qrbig" id="qrbig">${qrSVG(204,2,refLink())}</div>
+    <div class="qrlink" id="qrlinktxt">${refLink()}</div>
+    <div id="qrnote" style="font-size:.72rem;color:var(--ink2);margin-top:6px">${refSlug(myRef())?'Mã QR này đã gắn mã giới thiệu «'+refSlug(myRef())+'» — ai quét đều tính cho anh/chị.':'Nhập mã giới thiệu bên dưới để biết ai mời được bao nhiêu người.'}</div>
     <div class="row2" style="margin-top:12px"><button class="btn half primary" onclick="qrPNG()">⤓ Tải ảnh QR</button><button class="btn half" onclick="copyLink()">⧉ Sao chép link</button></div>
     <button class="btn block" style="margin-top:9px" onclick="shareApp()">↗ Chia sẻ qua ứng dụng khác</button>
     <div class="card" style="text-align:left"><b style="font-size:.8rem">Link giới thiệu riêng của anh/chị</b>
       <div style="font-size:.72rem;color:var(--ink2);margin-top:2px">Nhập tên hoặc mã để biết ai mời được bao nhiêu người dùng thử.</div>
-      <div class="field" style="margin-top:8px"><input id="refin" type="text" placeholder="VD: anh-hung, shop-mai-anh" value="${(myRef()||'').replace(/"/g,'')}"></div>
+      <div class="field" style="margin-top:8px"><input id="refin" type="text" placeholder="VD: anh-hung, shop-mai-anh" value="${(myRef()||'').replace(/"/g,'')}" oninput="refPreview()"></div>
       <div class="qrlink" id="reflink" style="margin-top:8px">${refLink()}</div>
       <div class="row2"><button class="btn half" onclick="copyRefLink()">⧉ Sao chép</button><button class="btn half primary" onclick="shareRefLink()">↗ Chia sẻ</button></div>
+      <button class="alink" style="margin:8px auto 0;display:block" onclick="refAuto()">Chưa nghĩ ra mã? Tạo giúp tôi một mã riêng</button>
     </div>
     <div class="card" style="text-align:left"><b style="font-size:.8rem">Người nhận làm gì?</b>
       ${[['1','Quét mã QR bằng camera điện thoại (hoặc mở link)'],['2','Bấm «Thêm vào Màn hình chính» để dùng như app'],['3','Đăng ký bằng số điện thoại — dùng được ngay']].map(s=>`<div class="listitem"><span class="cicon" style="background:var(--navy);width:24px;height:24px;font-size:.7rem">${s[0]}</span><div style="flex:1;font-size:.76rem">${s[1]}</div></div>`).join('')}
