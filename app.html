@@ -9,7 +9,12 @@
 }
 </script>
 <!-- v1.1 · 28/07/2026 · thay v1.0 27/07 (chuyển 99-Luu-tru): tương phản AA (--muted #898781→#6b6963, nút chính dùng accent-deep), touch target 44/38px, FAB Tạo/Quét mọi tab + sheet 2 lựa chọn (ADR-D4), cập nhật trích dẫn NĐ 254/2026 thay NĐ 70 (rule draft-08), nhãn phiên bản. -->
-<!-- BẢN DÙNG THỬ (trial) 1.2 · 31/07/2026 · theo yêu cầu Bobby, thêm 4 việc: (1) TRANG GIỚI THIỆU riêng (index.html) đứng trước app, app chuyển sang app.html, manifest start_url trỏ app.html;
+<!-- BẢN DÙNG THỬ (trial) 1.3 · 31/07/2026 · theo yêu cầu Bobby, 3 việc:
+     (1) MÃ NGƯỜI GIỚI THIỆU — link kèm ?ref=<mã>; app lưu lại và gắn vào mọi tín hiệu (mở app, góp ý, chấm điểm) → trang theo dõi biết ai mời ai;
+         màn "Mời & chia sẻ" có ô nhập tên/mã để tự tạo link giới thiệu riêng (sao chép hoặc chia sẻ).
+     (2) NÚT GÓP Ý NỔI — nút tròn 💬 ở mọi màn chính, không phải vào băng vàng nữa.
+     (3) HỎI CHẤM ĐIỂM — sau ~3 phút dùng thật, hiện thẻ "Anh/chị chấm mấy điểm?" (1–5 sao + ghi chú tuỳ chọn), gửi về API; mỗi máy chỉ hỏi 1 lần, bấm "Để sau" thì phiên sau mới hỏi lại.
+     BẢN DÙNG THỬ (trial) 1.2 · 31/07/2026 · theo yêu cầu Bobby, thêm 4 việc: (1) TRANG GIỚI THIỆU riêng (index.html) đứng trước app, app chuyển sang app.html, manifest start_url trỏ app.html;
      (2) THU GÓP Ý TẬP TRUNG — gửi thẳng về API (Railway) thay vì bắt người dùng copy sang Zalo; mất mạng thì xếp hàng đợi trong máy và tự gửi lại khi có mạng;
      (3) ĐẾM LƯỢT MỞ — mỗi lần mở app gửi 1 tín hiệu ẩn danh (mã máy ngẫu nhiên, không thu thông tin cá nhân), có trang theo dõi riêng cho nội bộ;
      (4) CHẠY OFFLINE — service worker sw.js lưu sẵn trang, lần sau mất mạng vẫn mở được.
@@ -111,6 +116,12 @@ main{flex:1;overflow-y:auto;padding:2px 14px 16px;overscroll-behavior:contain}
 .gain{color:var(--good-text);font-weight:700}
 .sig{background:#f0efec;color:var(--ink2);border-radius:6px;font-size:.66rem;padding:2px 7px;display:inline-block;margin:2px 3px 0 0}
 .fab{position:absolute;right:16px;bottom:calc(76px + env(safe-area-inset-bottom));width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;font-size:1.5rem;font-weight:700;box-shadow:0 10px 24px -8px rgba(42,120,214,.55);display:flex;align-items:center;justify-content:center;z-index:5}
+/* trial 1.3: nút góp ý nổi + hỏi chấm điểm */
+.fabfb{position:absolute;left:16px;bottom:calc(76px + env(safe-area-inset-bottom));width:46px;height:46px;border-radius:50%;background:var(--surface);border:1px solid var(--border);color:var(--accent-deep);font-size:1.2rem;box-shadow:0 8px 20px -8px rgba(15,23,42,.35);display:flex;align-items:center;justify-content:center;z-index:6}
+.stars{display:flex;justify-content:center;gap:6px;margin:14px 0 6px}
+.stars button{font-size:2rem;line-height:1;color:#d8d7d0;padding:2px 3px}
+.stars button.on{color:#f5a623}
+.npshint{font-size:.72rem;color:var(--muted);text-align:center}
 /* bản dùng thử (trial 1.0) */
 .trialbar{display:flex;align-items:center;gap:8px;background:#fdf3d9;border-bottom:1px solid #f0e0b0;padding:6px 14px;font-size:.68rem;color:#7a5200;font-weight:700}
 .trialbar button{font-size:.66rem;font-weight:700;color:#7a5200;text-decoration:underline;padding:2px 0}
@@ -209,6 +220,7 @@ main{flex:1;overflow-y:auto;padding:2px 14px 16px;overscroll-behavior:contain}
   <div class="appbar" id="appbar"></div>
   <main id="view"></main>
   <button class="fab" id="fab" style="display:none" onclick="quickOrder()">+</button>
+  <button class="fabfb" id="fabfb" title="Gửi góp ý" aria-label="Gửi góp ý" onclick="feedbackSheet()">💬</button>
   <nav class="tabbar" id="tabbar"></nav>
   <div class="sheetwrap" id="sheetwrap" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
   <div class="toast" id="toast"></div>
@@ -723,12 +735,16 @@ const A={scr:'login',ctx:'login',phone:'',toured:false};
 const QRM=["11111110010001111001001111111", "10000010101011111111001000001", "10111010011100001000101011101", "10111010011010100010001011101", "10111010100100010011001011101", "10000010001001111001001000001", "11111110101010101010101111111", "00000000010111010101100000000", "10101010000001001110000010010", "01101000111100001000111001001", "00110111001100100100001110111", "01110100100011011101011000010", "10101110011111011101101101011", "00001101010001100000101001001", "10100111011100001010001011011", "10100101101011101110111111010", "10101110100011111100101001011", "01001000100100001000101001101", "10111011100001000100101010011", "01000000001111110110110001010", "10110010000000101111111110000", "00000000100000001001100010111", "11111110010001001101101011011", "10000010010110000111100011000", "10111010101100001100111110000", "10111010001010001111110010111", "10111010110110000111110111001", "10000010011011001110110100010", "11111110110000111100100011011"];
 const APPURL='https://pthub2026.github.io/soban-ai-thu/';
 const API='https://soban-ai-thu-api-production.up.railway.app';
-const TRIAL={days:14,build:'trial 1.2 · 31/07/2026'};
+const TRIAL={days:14,build:'trial 1.3 · 31/07/2026'};
 function lsGet(k,d){try{return localStorage.getItem(k)||d;}catch(e){return d;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function refCode(){
+  try{const q=new URLSearchParams(location.search).get('ref');if(q){lsSet('sbai_ref',q.slice(0,40));}}catch(e){}
+  return lsGet('sbai_ref','');
+}
 function sid(){let s=lsGet('sbai_sid','');if(!s){s='s'+Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);lsSet('sbai_sid',s);}return s;}
 function post(path,body){return fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),keepalive:true});}
-function pingHit(){try{post('/hit',{sid:sid(),page:'app',standalone:standalone()}).catch(()=>{});}catch(e){}}
+function pingHit(){try{post('/hit',{sid:sid(),page:'app',ref:refCode(),standalone:standalone()}).catch(()=>{});}catch(e){}}
 /* hàng đợi góp ý khi mất mạng */
 function fbQueue(){try{return JSON.parse(lsGet('sbai_fbq','[]'));}catch(e){return [];}}
 function fbQueueSet(a){lsSet('sbai_fbq',JSON.stringify(a.slice(-20)));}
@@ -740,7 +756,7 @@ window.addEventListener('online',flushFeedback);
 function isIOS(){return /iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);}
 function standalone(){return window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;}
 function trialSheet(){openSheet(`<h2>Bản dùng thử Sổ Bán AI</h2>
-  <div style="font-size:.72rem;color:var(--muted)">${TRIAL.build} · thời hạn dùng thử ${TRIAL.days} ngày</div>
+  <div style="font-size:.72rem;color:var(--muted)">${TRIAL.build} · thời hạn dùng thử ${TRIAL.days} ngày${refCode()?" · giới thiệu bởi <b>"+refCode()+"</b>":""}</div>
   <div class="callout" style="margin-top:10px">Bản này để anh/chị <b>trải nghiệm luồng làm việc</b>: gom đơn, cứu đơn, đẩy vận chuyển, đối soát COD, trợ lý thuế. Toàn bộ số liệu là <b>dữ liệu mô phỏng</b> của một shop mẫu.</div>
   <div class="simline"><span>Dùng thử được ngay</span><b>Toàn bộ màn hình & thao tác</b></div>
   <div class="simline"><span>Chưa nối thật</span><b>API sàn, hãng vận chuyển, ngân hàng, hóa đơn</b></div>
@@ -767,7 +783,7 @@ function feedbackSheet(){openSheet(`<h2>Gửi góp ý</h2>
 function sendFeedback(){
   const el=document.getElementById('fbtxt');const t=(el&&el.value||'').trim();
   if(!t){toast('Anh/chị nhập nội dung góp ý giúp em nhé');return;}
-  const item={text:t,sid:sid(),page:'app',build:TRIAL.build};
+  const item={text:t,sid:sid(),page:'app',ref:refCode(),build:TRIAL.build};
   closeSheet();
   post('/feedback',item).then(r=>{
     if(r.ok){toast('Đã gửi góp ý — cảm ơn anh/chị!');}
@@ -780,6 +796,42 @@ function resetDemo(){
   RAWQ.forEach(r=>{r.done=false;});
   S.tab='home';S.sub=null;S.of='all';S.vcSel=null;closeSheet();render();
   toast('Đã khôi phục dữ liệu mẫu ban đầu');
+}
+/* hỏi chấm điểm sau ~3 phút dùng (mỗi máy 1 lần) */
+let npsScore=0, npsTimer=null;
+function npsDone(){return lsGet('sbai_nps','')==='done';}
+function scheduleNPS(){
+  if(npsDone()||npsTimer)return;
+  npsTimer=setTimeout(()=>{ if(npsDone())return;
+    if(document.getElementById('sheetwrap').classList.contains('open')||document.getElementById('coach').classList.contains('on')){npsTimer=null;scheduleNPS();return;}
+    npsSheet();
+  },180000);
+}
+function npsSheet(){
+  npsScore=0;
+  openSheet(`<h2>Anh/chị chấm mấy điểm?</h2>
+  <div style="font-size:.78rem;color:var(--ink2)">Sau khi thử qua, anh/chị thấy Sổ Bán AI hữu ích tới đâu? Đánh giá giúp em một câu thôi cũng được.</div>
+  <div class="stars" id="stars">${[1,2,3,4,5].map(i=>`<button onclick="setStar(${i})" aria-label="${i} sao">★</button>`).join('')}</div>
+  <div class="npshint" id="npshint">1 sao = chưa dùng được · 5 sao = rất hữu ích</div>
+  <div class="field" style="margin-top:10px"><label>Điều gì khiến anh/chị chấm vậy? (không bắt buộc)</label><textarea id="npstxt" rows="3" placeholder="VD: gom đơn nhanh nhưng phần thuế chưa rõ..." style="width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:13px;padding:11px 13px;font-size:.92rem;font-family:inherit;color:var(--ink)"></textarea></div>
+  <div class="row2"><button class="btn half" onclick="npsLater()">Để sau</button><button class="btn half primary" onclick="sendNPS()">Gửi đánh giá</button></div>`);
+}
+function setStar(n){
+  npsScore=n;
+  const bs=document.querySelectorAll('#stars button');
+  bs.forEach((b,i)=>b.classList.toggle('on',i<n));
+  const h=document.getElementById('npshint');
+  if(h)h.textContent=['','Rất tiếc — anh/chị cho em biết vướng ở đâu nhé','Còn nhiều chỗ phải sửa','Tạm được','Khá hữu ích','Rất hữu ích — cảm ơn anh/chị!'][n];
+}
+function npsLater(){closeSheet();npsTimer=null;toast('Vâng, để sau ạ');}
+function sendNPS(){
+  if(!npsScore){toast('Anh/chị chọn số sao giúp em nhé');return;}
+  const el=document.getElementById('npstxt');
+  const item={score:npsScore,comment:(el&&el.value||'').trim(),sid:sid(),ref:refCode(),build:TRIAL.build};
+  lsSet('sbai_nps','done');closeSheet();
+  post('/nps',item).then(()=>toast('Cảm ơn anh/chị đã đánh giá!')).catch(()=>{
+    const q=fbQueue();q.push({text:'[Đánh giá '+item.score+'/5] '+(item.comment||''),sid:item.sid,ref:item.ref,build:item.build});fbQueueSet(q);
+    toast('Đang offline — đánh giá đã lưu, sẽ gửi khi có mạng');});
 }
 /* tour 4 bước cho người dùng thử lần đầu */
 const TOUR=[
@@ -815,6 +867,16 @@ function copyLink(){
   else{fallbackCopy();ok();}
 }
 function fallbackCopy(){const t=document.createElement('textarea');t.value=APPURL;document.body.appendChild(t);t.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(t);}
+function myRef(){return lsGet('sbai_myref','');}
+function refSlug(v){return String(v||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,32);}
+function refLink(){const r=refSlug(myRef());return r?APPURL+'?ref='+r:APPURL;}
+function readRefInput(){const el=document.getElementById('refin');const v=refSlug(el&&el.value);lsSet('sbai_myref',v);const out=document.getElementById('reflink');if(out)out.textContent=refLink();return refLink();}
+function copyRefLink(){const l=readRefInput();const done=()=>toast(l===APPURL?'Đã sao chép link (chưa nhập mã giới thiệu)':'Đã sao chép link giới thiệu: '+l);
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(l).then(done).catch(()=>{fbCopy(l);done();});}else{fbCopy(l);done();}}
+function fbCopy(v){const t=document.createElement('textarea');t.value=v;document.body.appendChild(t);t.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(t);}
+function shareRefLink(){const l=readRefInput();
+  if(navigator.share){navigator.share({title:'Sổ Bán AI',text:'Mời anh/chị dùng thử Sổ Bán AI:',url:l}).then(()=>toast('Đã mở bảng chia sẻ')).catch(()=>{});}
+  else{copyRefLink();}}
 function shareApp(){
   const data={title:'Sổ Bán AI',text:'Tải Sổ Bán AI — trợ lý bán hàng đa kênh & thuế cho hộ kinh doanh:',url:APPURL};
   if(navigator.share){navigator.share(data).then(()=>toast('Đã mở bảng chia sẻ')).catch(()=>{});}
@@ -823,6 +885,7 @@ function shareApp(){
 function aField(id,label,ph,type){return `<div class="field"><label>${label}</label><input id="${id}" type="${type||'tel'}" placeholder="${ph}" autocomplete="off"></div>`;}
 function renderAuth(){
   const el=document.getElementById('auth');if(!el)return;
+  const fb=document.getElementById('fabfb');if(fb)fb.style.display='none';
   const S1={
   login:`<div class="alogo">SB</div><h1>Sổ Bán AI</h1><div class="asub">Trợ lý bán hàng đa kênh & thuế cho hộ kinh doanh<br><b style="color:#7a5200">Bản dùng thử · dữ liệu mô phỏng</b></div>
     ${aField('aphone','Số điện thoại','090 xxx xxxx')}
@@ -841,6 +904,12 @@ function renderAuth(){
     <div class="qrlink">${APPURL}</div>
     <div class="row2" style="margin-top:12px"><button class="btn half primary" onclick="qrPNG()">⤓ Tải ảnh QR</button><button class="btn half" onclick="copyLink()">⧉ Sao chép link</button></div>
     <button class="btn block" style="margin-top:9px" onclick="shareApp()">↗ Chia sẻ qua ứng dụng khác</button>
+    <div class="card" style="text-align:left"><b style="font-size:.8rem">Link giới thiệu riêng của anh/chị</b>
+      <div style="font-size:.72rem;color:var(--ink2);margin-top:2px">Nhập tên hoặc mã để biết ai mời được bao nhiêu người dùng thử.</div>
+      <div class="field" style="margin-top:8px"><input id="refin" type="text" placeholder="VD: anh-hung, shop-mai-anh" value="${(myRef()||'').replace(/"/g,'')}"></div>
+      <div class="qrlink" id="reflink" style="margin-top:8px">${refLink()}</div>
+      <div class="row2"><button class="btn half" onclick="copyRefLink()">⧉ Sao chép</button><button class="btn half primary" onclick="shareRefLink()">↗ Chia sẻ</button></div>
+    </div>
     <div class="card" style="text-align:left"><b style="font-size:.8rem">Người nhận làm gì?</b>
       ${[['1','Quét mã QR bằng camera điện thoại (hoặc mở link)'],['2','Bấm «Thêm vào Màn hình chính» để dùng như app'],['3','Đăng ký bằng số điện thoại — dùng được ngay']].map(s=>`<div class="listitem"><span class="cicon" style="background:var(--navy);width:24px;height:24px;font-size:.7rem">${s[0]}</span><div style="flex:1;font-size:.76rem">${s[1]}</div></div>`).join('')}
     </div>
@@ -880,7 +949,8 @@ function otpNext(){
   else{A.scr='newpin';renderAuth();}
 }
 function openQR(){A.scr='qr';renderAuth();document.getElementById('auth').style.display='flex';}
-function enterApp(msg){document.getElementById('auth').style.display='none';if(msg)toast(msg);if(!A.toured){A.toured=true;setTimeout(()=>showTour(0),450);}}
+function backToApp(){document.getElementById('auth').style.display='none';const fb=document.getElementById('fabfb');if(fb)fb.style.display='flex';}
+function enterApp(msg){document.getElementById('auth').style.display='none';{const fb=document.getElementById('fabfb');if(fb)fb.style.display='flex';}if(msg)toast(msg);if(!A.toured){A.toured=true;setTimeout(()=>showTour(0),450);}scheduleNPS();}
 function logout(){closeSheet();S.tab='home';S.sub=null;render();A.scr='login';A.ctx='login';renderAuth();document.getElementById('auth').style.display='flex';toast('Đã đăng xuất');}
 renderAuth();
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}

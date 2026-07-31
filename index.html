@@ -53,7 +53,8 @@ footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);font-si
     <div class="tag">BẢN DÙNG THỬ · MIỄN PHÍ</div>
     <h1>Sổ Bán AI</h1>
     <p class="lead">Trợ lý bán hàng đa kênh &amp; thuế cho hộ kinh doanh. Gom đơn từ Facebook, Zalo, TikTok về một chỗ — AI giúp giảm hoàn hàng và lo phần thuế theo quy định 2026.</p>
-    <a class="cta" href="./app.html">Mở bản dùng thử ngay →</a>
+    <div id="refbox" style="display:none;background:#e9f5e9;color:#006300;border-radius:12px;padding:9px 12px;font-size:.85rem;font-weight:700;margin-top:16px"></div>
+    <a class="cta" id="golink" href="./app.html">Mở bản dùng thử ngay →</a>
     <a class="cta ghost" href="#cai-dat">Cách cài lên màn hình chính</a>
     <p class="note">Không cần tải app, không cần đăng ký. Dữ liệu trong bản dùng thử là số liệu mô phỏng.</p>
     <div class="facts"><span>✓ Miễn phí</span><span>✓ Chạy trên điện thoại</span><span>✓ Không cần cài đặt</span></div>
@@ -99,7 +100,15 @@ footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);font-si
   function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
   var s=lsGet('sbai_sid','');
   if(!s){s='s'+Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);lsSet('sbai_sid',s);}
-  try{fetch(API+'/hit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sid:s,page:'landing'}),keepalive:true}).catch(function(){});}catch(e){}
+  var ref='';
+  try{ref=new URLSearchParams(location.search).get('ref')||'';if(ref){ref=ref.slice(0,40);lsSet('sbai_ref',ref);}else{ref=lsGet('sbai_ref','');}}catch(e){}
+  if(ref){
+    var box=document.getElementById('refbox');
+    if(box){box.textContent='Anh/chị được '+ref+' mời dùng thử';box.style.display='block';}
+    var go=document.getElementById('golink');
+    if(go)go.setAttribute('href','./app.html?ref='+encodeURIComponent(ref));
+  }
+  try{fetch(API+'/hit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sid:s,page:'landing',ref:ref}),keepalive:true}).catch(function(){});}catch(e){}
   if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});}
 })();
 </script>
