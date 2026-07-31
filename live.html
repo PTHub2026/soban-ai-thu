@@ -9,8 +9,7 @@
 }
 </script>
 <!-- v1.1 · 28/07/2026 · thay v1.0 27/07 (chuyển 99-Luu-tru): tương phản AA (--muted #898781→#6b6963, nút chính dùng accent-deep), touch target 44/38px, FAB Tạo/Quét mọi tab + sheet 2 lựa chọn (ADR-D4), cập nhật trích dẫn NĐ 254/2026 thay NĐ 70 (rule draft-08), nhãn phiên bản. -->
-<!-- BẢN DÙNG THỬ (trial) 1.1 · 31/07/2026 · đã ĐĂNG TẠI https://pthub2026.github.io/soban-ai-thu/ (GitHub Pages, repo công khai PTHub2026/soban-ai-thu, nhánh main, cập nhật bằng cách push đè index.html). Khác 1.0: mã QR trong app trỏ ĐÚNG địa chỉ thật thay cho placeholder sobanai.vn/app (ma trận QR 29×29 sinh lại, verify bằng bộ giải mã).
-     BẢN DÙNG THỬ (trial) 1.0 · 30/07/2026 · dựng từ Mobile v1.6 theo yêu cầu Bobby "tạo bản dùng thử trên mobile". Khác bản prototype v1.6:
+<!-- BẢN DÙNG THỬ (trial) 1.0 · 30/07/2026 · dựng từ Mobile v1.6 theo yêu cầu Bobby "tạo bản dùng thử trên mobile". Khác bản prototype v1.6:
      (1) cài được lên màn hình chính như app thật — Web App Manifest + icon 180/192/512 nhúng base64 (không cần mạng), standalone, theme-color;
      (2) băng "BẢN DÙNG THỬ" + sheet giải thích cái gì thật / cái gì mô phỏng, không nhập dữ liệu khách thật;
      (3) hướng dẫn cài đặt riêng cho iPhone (Safari → Chia sẻ → Thêm vào MH chính) và Android (Chrome → Cài đặt ứng dụng), tự nhận hệ điều hành;
@@ -542,7 +541,7 @@ VIEW.more={
     `<button class="mitem" onclick="${m[0]==='qa'?'chatSheet()':m[0]==='setting'?`go('more','setting')`:`go('more','${m[0]}')`}"><i>${m[1]}</i>${m[2]}</button>`).join('')}
   </div>
   <div class="card"><h3>Về bản mobile</h3>
-    <div style="font-size:.76rem;color:var(--ink2);margin-top:4px">Prototype v1.3 (29/07/2026) · dữ liệu mô phỏng dùng chung với bản máy tính v1.2. Đây là <b>bản dùng thử (trial 1.0)</b> dựng từ prototype Mobile v1.7: cài được lên màn hình chính như app thật, có hướng dẫn cài, tour làm quen, gửi góp ý và khôi phục dữ liệu mẫu. Trước đó v1.5: đăng nhập/đăng ký/quên PIN (SĐT + OTP theo WF-01) và Cài đặt tài khoản (bảo mật, PDPL, vai trò). Trước đó v1.4: vuốt điều hướng, Thêm nền tảng, tile Salework. </div></div>`
+    <div style="font-size:.76rem;color:var(--ink2);margin-top:4px">Prototype v1.3 (29/07/2026) · dữ liệu mô phỏng dùng chung với bản máy tính v1.2. Đây là <b>bản dùng thử (trial 1.0)</b> dựng từ prototype Mobile v1.6: cài được lên màn hình chính như app thật, có hướng dẫn cài, tour làm quen, gửi góp ý và khôi phục dữ liệu mẫu. Trước đó v1.5: đăng nhập/đăng ký/quên PIN (SĐT + OTP theo WF-01) và Cài đặt tài khoản (bảo mật, PDPL, vai trò). Trước đó v1.4: vuốt điều hướng, Thêm nền tảng, tile Salework. </div></div>`
 };
 
 /* ---- sub views (from Thêm) ---- */
@@ -716,9 +715,9 @@ SUB.regwatch={
 /* ===== v1.5: đăng nhập / đăng ký / quên PIN (WF-01) ===== */
 const T={face:true,quiet:true,zns:true,fb:true,zl:true,tk:true};
 const A={scr:'login',ctx:'login',phone:'',toured:false};
-const QRM=["11111110010001111001001111111", "10000010101011111111001000001", "10111010011100001000101011101", "10111010011010100010001011101", "10111010100100010011001011101", "10000010001001111001001000001", "11111110101010101010101111111", "00000000010111010101100000000", "10101010000001001110000010010", "01101000111100001000111001001", "00110111001100100100001110111", "01110100100011011101011000010", "10101110011111011101101101011", "00001101010001100000101001001", "10100111011100001010001011011", "10100101101011101110111111010", "10101110100011111100101001011", "01001000100100001000101001101", "10111011100001000100101010011", "01000000001111110110110001010", "10110010000000101111111110000", "00000000100000001001100010111", "11111110010001001101101011011", "10000010010110000111100011000", "10111010101100001100111110000", "10111010001010001111110010111", "10111010110110000111110111001", "10000010011011001110110100010", "11111110110000111100100011011"];
-const APPURL='https://pthub2026.github.io/soban-ai-thu/';
-const TRIAL={days:14,build:'trial 1.1 · 31/07/2026'};
+const QRM=["1111111001111100101111111", "1000001000001111001000001", "1011101011101000101011101", "1011101011100101101011101", "1011101011001100101011101", "1000001011111111001000001", "1111111010101010101111111", "0000000011000010100000000", "1011111001000110001111100", "0111010110110000000100010", "0010011110101001110111011", "0010000110111011010000001", "0010111110100110011110111", "1011000000101010100101010", "1001001100000001101111011", "1000000100001001000110001", "1010101101101111111110100", "0000000010100011100011000", "1111111000111000101010111", "1000001010010000100011000", "1011101010110001111110111", "1011101011101101111011111", "1011101011000110100001101", "1000001001001101101111001", "1111111011001010011111111"];
+const APPURL='https://sobanai.vn/app';
+const TRIAL={days:14,build:'trial 1.0 · 30/07/2026'};
 function isIOS(){return /iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);}
 function standalone(){return window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;}
 function trialSheet(){openSheet(`<h2>Bản dùng thử Sổ Bán AI</h2>
