@@ -1,0 +1,62 @@
+# So Ban AI - ban dung thu: tu quan viec trien khai GitHub Pages
+# Thay cho workflow tu sinh "pages build and deployment" cua GitHub.
+# Ly do doi: workflow tu sinh LUON checkout kem submodule, nen chi can mot
+# thu muc long bi ghi nham thanh gitlink la build chet (su co 31/07/2026).
+# O day dat submodules: false nen loi do khong the xay ra nua.
+
+name: Trien khai Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Push lien tiep thi bo ban dang chay, chi giu ban moi nhat -> khong xep hang cho
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Lay ma nguon
+        uses: actions/checkout@v5
+        with:
+          submodules: false
+
+      - name: Chan gitlink lot luoi
+        run: |
+          if git ls-files -s | awk '$1 == "160000"' | grep -q .; then
+            echo "::error::Repo dang chua gitlink (submodule) - go bang: git rm --cached <thu-muc>"
+            git ls-files -s | awk '$1 == "160000"'
+            exit 1
+          fi
+          echo "Sach: khong co gitlink."
+
+      - name: Kiem tra file bat buoc
+        run: |
+          for f in index.html app.html sw.js .nojekyll; do
+            [ -e "$f" ] || { echo "::error::Thieu file $f"; exit 1; }
+          done
+          echo "Du file."
+
+      - name: Cau hinh Pages
+        uses: actions/configure-pages@v5
+
+      - name: Dong goi
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Trien khai
+        id: deployment
+        uses: actions/deploy-pages@v4
