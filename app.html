@@ -551,7 +551,7 @@ function carrierSheet(oid){
   <div class="callout"><b>AI đề xuất ${sugg.ten}:</b> ${o.risk>=60?'đơn rủi ro cao — ưu tiên tỷ lệ giao lần đầu để giảm hoàn':'đơn rủi ro thấp — ưu tiên phí rẻ'}.</div>
   <button class="btn block primary" style="margin-top:10px" onclick="ship('${o.id}','${sel.id}')">Tạo vận đơn qua ${sel.ten}</button>`);
 }
-function ship(oid,cid){const o=ORDERS.find(x=>x.id===oid);o.st='dang-giao';S.vcSel=null;closeSheet();toast('Đã tạo vận đơn '+CARRIERS.find(c=>c.id===cid).ten+' cho '+oid);render();}
+function ship(oid,cid){const o=ORDERS.find(x=>x.id===oid);if(!o){toast('Không tìm thấy đơn '+oid);return;}const car=CARRIERS.find(c=>c.id===cid);o.st='dang-giao';S.vcSel=null;closeSheet();toast('Đã tạo vận đơn '+(car?car.ten:cid)+' cho '+oid);render();}
 
 VIEW.rescue={
  bar:()=>bar('AI Cứu đơn','Xếp theo lợi ích kỳ vọng · margin guard đã kiểm'),
