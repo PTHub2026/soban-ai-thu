@@ -572,10 +572,10 @@ VIEW.rescue={
   <div class="note">Đang ở chế độ quy tắc + mô hình (dữ liệu 3 tháng). Mọi quyết định ghi audit log.</div>`;
  }
 };
-function rescueAct(oid,ok){const r=RESCUE.find(x=>x.oid===oid);r.done=true;r.ok=ok;closeSheet();toast(ok?'Đã gửi hành động cứu đơn '+oid:'Đã từ chối — AI học từ phản hồi này');render();}
+function rescueAct(oid,ok){const r=RESCUE.find(x=>x.oid===oid);if(!r)return;r.done=true;r.ok=ok;closeSheet();toast(ok?'Đã gửi hành động cứu đơn '+oid:'Đã từ chối — AI học từ phản hồi này');render();}
 /* trial 2.0: xem truoc noi dung tin truoc khi duyet — AI soan, chu shop quyet dinh */
 function rescueMsg(oid){
-  const r=RESCUE.find(x=>x.oid===oid),o=ORDERS.find(x=>x.id===oid);
+  const r=RESCUE.find(x=>x.oid===oid),o=ORDERS.find(x=>x.id===oid);if(!r||!o)return;
   const goi=r.act.indexOf('Gọi')===0;
   let body='';
   if(goi){
