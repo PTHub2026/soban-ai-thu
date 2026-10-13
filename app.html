@@ -532,7 +532,9 @@ function quickOrderParse(){openSheet(`<h2>Tạo đơn nhanh</h2>
   <div class="row2"><button class="btn half" onclick="closeSheet()">Sửa lại</button><button class="btn half primary" onclick="closeSheet();toast('Đã tạo đơn mới từ tin nhắn — chuyển sang chấm điểm rủi ro')">Tạo đơn</button></div>`);}
 function carrierSheet(oid){
   const o=ORDERS.find(x=>x.id===oid);
+  if(!o)return;
   const act=CARRIERS.filter(c=>c.st!=='soon');
+  if(!act.length)return;
   const fee=c=>c.phi+(o.cod>700000?3000:0);
   const cheap=act.reduce((a,b)=>fee(a)<=fee(b)?a:b);
   const fast=act.reduce((a,b)=>a.etaH<=b.etaH?a:b);
