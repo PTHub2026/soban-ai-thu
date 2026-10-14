@@ -502,6 +502,7 @@ VIEW.orders={
 };
 function orderSheet(id){
   const o=ORDERS.find(x=>x.id===id);
+  if(!o)return;
   openSheet(`<h2>${o.id} · ${o.kh}</h2>
   <div style="font-size:.74rem;color:var(--ink2)">${o.kenh} · ${o.dc}</div>
   <div style="display:flex;gap:6px;margin:10px 0;flex-wrap:wrap">
