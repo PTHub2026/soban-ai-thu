@@ -391,7 +391,7 @@ VIEW.home={
  body:()=>{
   const q=RESCUE.filter(r=>!r.done).length;
   const top=RESCUE.filter(r=>!r.done).sort((a,b)=>b.gain-a.gain)[0];
-  const dmin=DEADLINES.reduce((a,b)=>a.days<=b.days?a:b);
+  const dmin=DEADLINES.length?DEADLINES.reduce((a,b)=>a.days<=b.days?a:b):{days:0,t:'Không có hạn chót nào'};
   return `
   <button class="alertband" style="width:100%;text-align:left" onclick="openRuleSheet()">
     <span style="font-size:1.1rem">⚠</span><div style="flex:1"><b>1 quy định mới chờ duyệt — còn 3 ngày</b><small>NĐ 254/2026/NĐ-CP về hóa đơn · AI đã soạn đề xuất rule draft-08</small></div><span style="color:#7a5200;font-weight:800">›</span>
