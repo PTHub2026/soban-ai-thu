@@ -800,7 +800,7 @@ SUB.gomdon={
   </div>
   <div class="card">
     <div style="display:flex;align-items:center"><h3 style="flex:1">Hàng chờ gom (${pend.length})</h3>${pend.length?`<button class="btn sm primary" onclick="RAWQ.forEach(r=>r.done=true);toast('Đã gom toàn bộ về tab Đơn');render()">Gom tất cả</button>`:''}</div>
-    ${pend.length?pend.map(r=>`<div class="listitem"><div style="flex:1;min-width:0"><b style="font-size:.78rem">${r.src}</b><div style="font-size:.72rem;color:var(--ink2)">${r.p}</div></div><span class="badge ${r.conf>=90?'b-good':'b-warn'} num">${r.conf}%</span><button class="btn sm" onclick="r=RAWQ.find(x=>!x.done);r.done=true;toast('Đã gom đơn từ ${r.src}');render()">Gom</button></div>`).join(''):'<div style="font-size:.78rem;color:var(--good-text);padding:8px 0">✓ Không còn đơn chờ — tất cả đã về tab Đơn.</div>'}
+    ${pend.length?pend.map(r=>{const i=RAWQ.indexOf(r);return `<div class="listitem"><div style="flex:1;min-width:0"><b style="font-size:.78rem">${r.src}</b><div style="font-size:.72rem;color:var(--ink2)">${r.p}</div></div><span class="badge ${r.conf>=90?'b-good':'b-warn'} num">${r.conf}%</span><button class="btn sm" onclick="if(RAWQ[${i}]&&!RAWQ[${i}].done){RAWQ[${i}].done=true;toast('Đã gom đơn từ ${r.src}');render()}">Gom</button></div>`;}).join(''):'<div style="font-size:.78rem;color:var(--good-text);padding:8px 0">✓ Không còn đơn chờ — tất cả đã về tab Đơn.</div>'}
   </div>`;
  }
 };
