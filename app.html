@@ -559,7 +559,7 @@ VIEW.rescue={
   const pend=RESCUE.filter(r=>!r.done),done=RESCUE.filter(r=>r.done);
   return `
   <div class="callout" style="margin-top:12px">Tối đa 1 lần chạm/đơn · không nhắn 21h–8h · tôn trọng opt-out. Chi phí tin nhắn tính vào margin guard.</div>
-  ${pend.length?pend.map(r=>{const o=ORDERS.find(x=>x.id===r.oid);return `<div class="card">
+  ${pend.length?pend.map(r=>{const o=ORDERS.find(x=>x.id===r.oid);if(!o)return '';return `<div class="card">
     <div style="display:flex;align-items:center;gap:8px"><b>${r.oid}</b><span class="badge ${riskCls(o.risk)}">Rủi ro <b class="num">${o.risk}</b> · ${riskTier(o.risk)}</span><span style="flex:1"></span><b class="num gain">+${fmt(r.gain)} ₫</b></div>
     <div style="font-size:.74rem;color:var(--ink2);margin-top:2px">${o.kh} · COD <b class="num">${fmt(o.cod)} ₫</b></div>
     <div style="margin-top:7px"><span class="eyebrow">AI phát hiện</span><div style="margin-top:3px">${o.ly.length?o.ly.map(l=>`<span class="sig">${l}</span>`).join(''):'<span class="sig">Tín hiệu tổng hợp mô hình</span>'}</div></div>
