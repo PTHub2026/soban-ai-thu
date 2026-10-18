@@ -336,7 +336,7 @@ const TABS=[
  {id:'home',ic:'▦',t:'Hôm nay'},
  {id:'orders',ic:'☰',t:'Đơn'},
  {id:'rescue',ic:'⛑',t:'Cứu đơn',bd:()=>RESCUE.filter(r=>!r.done).length||''},
- {id:'tax',ic:'∑',t:'Thuế',bd:()=>1},
+ {id:'tax',ic:'∑',t:'Thuế',bd:()=>DEADLINES.filter(d=>d.st==='crit').length||''},
  {id:'more',ic:'⋯',t:'Thêm'},
 ];
 let S={tab:'home',sub:null,of:'all',src:'all',q:'',vcSel:null};
