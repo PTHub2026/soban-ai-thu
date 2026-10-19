@@ -568,7 +568,7 @@ VIEW.rescue={
     <div class="row2"><button class="btn half" onclick="rescueMsg('${r.oid}')">Xem tin nhắn</button><button class="btn half primary" onclick="rescueAct('${r.oid}',true)">Duyệt & gửi</button></div>
     <button class="btn ghost sm" style="margin:6px auto 0;display:block;color:var(--muted)" onclick="rescueAct('${r.oid}',false)">Từ chối đề xuất này</button>
   </div>`}).join(''):`<div class="card" style="text-align:center;padding:28px 14px"><div style="font-size:2rem">✓</div><b>Đã xử lý hết hàng chờ</b><div style="font-size:.76rem;color:var(--ink2);margin-top:4px">Kết quả giao thật sẽ được đối chứng trong Báo cáo lợi ích.</div></div>`}
-  ${done.length?`<div class="card"><h3>Đã xử lý hôm nay</h3>${done.map(r=>`<div class="listitem"><b style="font-size:.8rem">${r.oid}</b><span style="flex:1;font-size:.72rem;color:var(--ink2)">${r.act.slice(0,44)}...</span><span class="badge ${r.ok?'b-good':'b-mut'}">${r.ok?'Đã gửi':'Từ chối'}</span></div>`).join('')}</div>`:''}
+  ${done.length?`<div class="card"><h3>Đã xử lý hôm nay</h3>${done.map(r=>`<div class="listitem"><b style="font-size:.8rem">${r.oid}</b><span style="flex:1;font-size:.72rem;color:var(--ink2)">${r.act.length>44?r.act.slice(0,44)+"...":r.act}</span><span class="badge ${r.ok?'b-good':'b-mut'}">${r.ok?'Đã gửi':'Từ chối'}</span></div>`).join('')}</div>`:''}
   <div class="note">Đang ở chế độ quy tắc + mô hình (dữ liệu 3 tháng). Mọi quyết định ghi audit log.</div>`;
  }
 };
