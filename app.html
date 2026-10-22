@@ -392,12 +392,14 @@ VIEW.home={
   const q=RESCUE.filter(r=>!r.done).length;
   const top=RESCUE.filter(r=>!r.done).sort((a,b)=>b.gain-a.gain)[0];
   const dmin=DEADLINES.reduce((a,b)=>a.days<=b.days?a:b);
+  const todOrders=PLATFORMS.filter(p=>p.st==='on').reduce((s,p)=>s+(p.today||0),0);
+  const todChannels=PLATFORMS.filter(p=>p.st==='on'&&p.today>0).length;
   return `
   <button class="alertband" style="width:100%;text-align:left" onclick="openRuleSheet()">
     <span style="font-size:1.1rem">⚠</span><div style="flex:1"><b>1 quy định mới chờ duyệt — còn 3 ngày</b><small>NĐ 254/2026/NĐ-CP về hóa đơn · AI đã soạn đề xuất rule draft-08</small></div><span style="color:#7a5200;font-weight:800">›</span>
   </button>
   <div class="kchips">
-    <button class="kchip" onclick="go('orders')"><span class="lb">ĐƠN HÔM NAY</span><div class="vl num">29</div><span class="cx" style="color:var(--good-text)">▲ +12% tuần</span>${spark([18,22,25,19,27,31,29],'#2a78d6',26)}</button>
+    <button class="kchip" onclick="go('orders')"><span class="lb">ĐƠN HÔM NAY</span><div class="vl num">${todOrders}</div><span class="cx" style="color:var(--good-text)">▲ +12% tuần</span>${spark([18,22,25,19,27,31,29],'#2a78d6',26)}</button>
     <button class="kchip" onclick="go('rescue')"><span class="lb">CẦN CỨU</span><div class="vl num" style="color:var(--critical)">${q}</div><span class="cx">≈ ${tr(795000)} giữ lại</span>${spark([2,4,3,6,4,7,5],'#d03b3b',26)}</button>
     <button class="kchip" onclick="go('more','cod')"><span class="lb">COD LỆCH</span><div class="vl num">1,27 tr</div><span class="cx" style="color:var(--critical)">3 vận đơn</span>${spark([0.4,1.9,0.7,2.2,1.1,0.1,1.27],'#eb6834',26)}</button>
     <button class="kchip" onclick="go('more','stats')"><span class="lb">DOANH THU 7 NGÀY</span><div class="vl num">65,8 tr</div><span class="cx" style="color:var(--good-text)">▲ +8,4%</span>${spark([6.8,7.4,9.1,8.2,10.6,12.3,11.4],'#1baf7a',26)}</button>
@@ -415,7 +417,7 @@ VIEW.home={
   <div class="card">
     <div style="display:flex;align-items:center"><h3 style="flex:1">Hôm nay bán được</h3><button class="btn ghost sm" onclick="go('more','stats')">Thống kê ›</button></div>
     <div class="big num" style="margin-top:4px">11,4 tr</div>
-    <div style="font-size:.72rem;color:var(--ink2)">29 đơn · 4 kênh · giá trị đơn TB 394 k</div>
+    <div style="font-size:.72rem;color:var(--ink2)">${todOrders} đơn · ${todChannels} kênh · giá trị đơn TB 394 k</div>
     ${spark([6.8,7.4,9.1,8.2,10.6,12.3,11.4],'#2a78d6',40)}
   </div>
   <div class="card">
