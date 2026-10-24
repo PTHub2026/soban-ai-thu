@@ -381,6 +381,8 @@ function openNoti(){openSheet(`<h2>Thông báo</h2>
 
 /* ================= views ================= */
 const VIEW={}, SUB={};
+/* Canonical daily revenue for July 2026 (days 1–26 hardcoded; day 27 computed so total = 218 tr) */
+const DAILY_REV=(()=>{const d=[5.2,6.1,5.8,7.2,6.6,7.8,9.4,6.9,7.4,8.8,7.1,8.2,9.6,10.8,6.4,7.0,8.5,7.7,8.9,10.2,11.6,7.2,7.9,9.1,8.4,10.6];const s=d.reduce((a,b)=>a+b,0);d.push(+((218-s).toFixed(1)));return d;})();
 
 VIEW.home={
  bar:()=>{
@@ -392,6 +394,13 @@ VIEW.home={
   const q=RESCUE.filter(r=>!r.done).length;
   const top=RESCUE.filter(r=>!r.done).sort((a,b)=>b.gain-a.gain)[0];
   const dmin=DEADLINES.reduce((a,b)=>a.days<=b.days?a:b);
+  const weekRev=DAILY_REV.slice(-7);
+  const todRev=weekRev[weekRev.length-1];
+  const wkTotal=weekRev.reduce((a,b)=>a+b,0);
+  const prevTotal=DAILY_REV.slice(-14,-7).reduce((a,b)=>a+b,0);
+  const wkPct=((wkTotal-prevTotal)/prevTotal*100).toFixed(1).replace('.',',');
+  const wkTotalFmt=(Math.round(wkTotal*10)/10).toFixed(1).replace('.',',');
+  const todRevFmt=todRev.toFixed(1).replace('.',',');
   return `
   <button class="alertband" style="width:100%;text-align:left" onclick="openRuleSheet()">
     <span style="font-size:1.1rem">⚠</span><div style="flex:1"><b>1 quy định mới chờ duyệt — còn 3 ngày</b><small>NĐ 254/2026/NĐ-CP về hóa đơn · AI đã soạn đề xuất rule draft-08</small></div><span style="color:#7a5200;font-weight:800">›</span>
@@ -400,7 +409,7 @@ VIEW.home={
     <button class="kchip" onclick="go('orders')"><span class="lb">ĐƠN HÔM NAY</span><div class="vl num">29</div><span class="cx" style="color:var(--good-text)">▲ +12% tuần</span>${spark([18,22,25,19,27,31,29],'#2a78d6',26)}</button>
     <button class="kchip" onclick="go('rescue')"><span class="lb">CẦN CỨU</span><div class="vl num" style="color:var(--critical)">${q}</div><span class="cx">≈ ${tr(795000)} giữ lại</span>${spark([2,4,3,6,4,7,5],'#d03b3b',26)}</button>
     <button class="kchip" onclick="go('more','cod')"><span class="lb">COD LỆCH</span><div class="vl num">1,27 tr</div><span class="cx" style="color:var(--critical)">3 vận đơn</span>${spark([0.4,1.9,0.7,2.2,1.1,0.1,1.27],'#eb6834',26)}</button>
-    <button class="kchip" onclick="go('more','stats')"><span class="lb">DOANH THU 7 NGÀY</span><div class="vl num">65,8 tr</div><span class="cx" style="color:var(--good-text)">▲ +8,4%</span>${spark([6.8,7.4,9.1,8.2,10.6,12.3,11.4],'#1baf7a',26)}</button>
+    <button class="kchip" onclick="go('more','stats')"><span class="lb">DOANH THU 7 NGÀY</span><div class="vl num">${wkTotalFmt} tr</div><span class="cx" style="color:var(--good-text)">▲ +${wkPct}%</span>${spark(weekRev,'#1baf7a',26)}</button>
     <button class="kchip" onclick="go('tax')"><span class="lb">THUẾ · HẠN GẦN NHẤT</span><div class="vl num" style="color:${dmin.days<=5?'var(--serious)':'var(--ink)'}">${dmin.days} ngày</div><span class="cx" style="white-space:normal">${dmin.t.length>34?dmin.t.slice(0,32)+'…':dmin.t}</span></button>
   </div>
   <div class="card">
@@ -414,9 +423,9 @@ VIEW.home={
   </div>
   <div class="card">
     <div style="display:flex;align-items:center"><h3 style="flex:1">Hôm nay bán được</h3><button class="btn ghost sm" onclick="go('more','stats')">Thống kê ›</button></div>
-    <div class="big num" style="margin-top:4px">11,4 tr</div>
+    <div class="big num" style="margin-top:4px">${todRevFmt} tr</div>
     <div style="font-size:.72rem;color:var(--ink2)">29 đơn · 4 kênh · giá trị đơn TB 394 k</div>
-    ${spark([6.8,7.4,9.1,8.2,10.6,12.3,11.4],'#2a78d6',40)}
+    ${spark(weekRev,'#2a78d6',40)}
   </div>
   <div class="card">
     <h3>Tách dòng doanh thu tháng 7 (NĐ 117)</h3>
@@ -760,8 +769,7 @@ VIEW.more={
 SUB.stats={
  bar:()=>bar('Thống kê','Tháng 7/2026 · kiểu chữ dữ liệu riêng','more'),
  body:()=>{
-  const daily=[5.2,6.1,5.8,7.2,6.6,7.8,9.4,6.9,7.4,8.8,7.1,8.2,9.6,10.8,6.4,7.0,8.5,7.7,8.9,10.2,11.6,7.2,7.9,9.1,8.4,10.6];
-  const s=daily.reduce((a,b)=>a+b,0);daily.push(+((218-s).toFixed(1)));
+  const daily=DAILY_REV;
   return `<div class="stats">
   <div class="kchips">
     <div class="kchip"><span class="lb">DOANH THU T7</span><div class="vl num">218,0 tr</div><span class="cx" style="color:var(--good-text)">▲ +14,2%</span></div>
