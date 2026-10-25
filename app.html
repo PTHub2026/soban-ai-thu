@@ -762,11 +762,13 @@ SUB.stats={
  body:()=>{
   const daily=[5.2,6.1,5.8,7.2,6.6,7.8,9.4,6.9,7.4,8.8,7.1,8.2,9.6,10.8,6.4,7.0,8.5,7.7,8.9,10.2,11.6,7.2,7.9,9.1,8.4,10.6];
   const s=daily.reduce((a,b)=>a+b,0);daily.push(+((218-s).toFixed(1)));
+  const monthRevTr=218,totalOrd=742;
+  const avgOrdK=Math.round(monthRevTr*1e6/totalOrd/1000);
   return `<div class="stats">
   <div class="kchips">
     <div class="kchip"><span class="lb">DOANH THU T7</span><div class="vl num">218,0 tr</div><span class="cx" style="color:var(--good-text)">▲ +14,2%</span></div>
-    <div class="kchip"><span class="lb">TỔNG ĐƠN</span><div class="vl num">742</div><span class="cx" style="color:var(--good-text)">▲ +9,8%</span></div>
-    <div class="kchip"><span class="lb">GIÁ TRỊ ĐƠN TB</span><div class="vl num">294 k</div><span class="cx">218 tr ÷ 742</span></div>
+    <div class="kchip"><span class="lb">TỔNG ĐƠN</span><div class="vl num">${totalOrd}</div><span class="cx" style="color:var(--good-text)">▲ +9,8%</span></div>
+    <div class="kchip"><span class="lb">GIÁ TRỊ ĐƠN TB</span><div class="vl num">${avgOrdK} k</div><span class="cx">${monthRevTr} tr ÷ ${totalOrd}</span></div>
     <div class="kchip"><span class="lb">GIAO LẦN ĐẦU</span><div class="vl num">85,2%</div><span class="cx" style="color:var(--good-text)">▲ +3,1 điểm</span></div>
   </div>
   <div class="card"><div class="eyebrow">DOANH THU THEO NGÀY (TRIỆU ₫)</div>${curveChart(daily,'#2a78d6')}<div class="note" style="border:0;padding:0">Lũy kế <b class="num">218,0 tr</b> · đỉnh ngày 21/07 (<b class="num">11,6 tr</b>)</div></div>
