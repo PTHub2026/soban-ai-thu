@@ -762,6 +762,9 @@ SUB.stats={
  body:()=>{
   const daily=[5.2,6.1,5.8,7.2,6.6,7.8,9.4,6.9,7.4,8.8,7.1,8.2,9.6,10.8,6.4,7.0,8.5,7.7,8.9,10.2,11.6,7.2,7.9,9.1,8.4,10.6];
   const s=daily.reduce((a,b)=>a+b,0);daily.push(+((218-s).toFixed(1)));
+  const delSegs=[['Thành công',668,'#0ca30c'],['Hoàn về',62,'#ec835a'],['Hủy',12,'#6b6963']];
+  const delTot=delSegs.reduce((a,seg)=>a+seg[1],0);
+  const delRate=Math.round(delSegs[0][1]/delTot*100)+'%';
   return `<div class="stats">
   <div class="kchips">
     <div class="kchip"><span class="lb">DOANH THU T7</span><div class="vl num">218,0 tr</div><span class="cx" style="color:var(--good-text)">▲ +14,2%</span></div>
@@ -771,7 +774,7 @@ SUB.stats={
   </div>
   <div class="card"><div class="eyebrow">DOANH THU THEO NGÀY (TRIỆU ₫)</div>${curveChart(daily,'#2a78d6')}<div class="note" style="border:0;padding:0">Lũy kế <b class="num">218,0 tr</b> · đỉnh ngày 21/07 (<b class="num">11,6 tr</b>)</div></div>
   <div class="card"><div class="eyebrow">CƠ CẤU DOANH THU THEO NỀN TẢNG</div><div style="margin-top:8px">${donutMulti([['FB Live',96,'#2a78d6'],['TikTok Shop',82,'#eb6834'],['Zalo OA',28,'#1baf7a'],['Website',12,'#eda100']],126,'218','triệu ₫')}</div></div>
-  <div class="card"><div class="eyebrow">KẾT QUẢ GIAO · 742 ĐƠN</div><div style="margin-top:8px">${donutMulti([['Thành công',668,'#0ca30c'],['Hoàn về',62,'#ec835a'],['Hủy',12,'#6b6963']],126,'90%','thành công')}</div></div>
+  <div class="card"><div class="eyebrow">KẾT QUẢ GIAO · 742 ĐƠN</div><div style="margin-top:8px">${donutMulti(delSegs,126,delRate,'thành công')}</div></div>
   <div class="card"><div class="eyebrow">ĐƠN THEO NGÀY TRONG TUẦN · 21–27/07</div>${colChart(['T2','T3','T4','T5','T6','T7','CN'],[18,22,25,19,27,31,29],'#2a78d6')}</div>
   <div class="card"><div class="eyebrow">ĐƠN THEO HÃNG VẬN CHUYỂN</div>${hbars([['BEST',512,'#c8102e'],['GHN',118,'#f96332'],['GHTK',84,'#00904a'],['J&T',28,'#d71618']])}</div>
   <div class="card"><div class="eyebrow">TOP SẢN PHẨM</div>
