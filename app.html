@@ -595,21 +595,21 @@ function rescueMsg(oid){
 
 VIEW.tax={
  bar:()=>bar('Tiền & Thuế','Một sổ cái: đơn → COD → doanh thu → thuế · Rule v2026.2'),
- body:()=>`
+ body:()=>{const dtQuy3=405;const gtgt=(dtQuy3*0.01).toFixed(2).replace('.',',')+' tr';const tncnA=(Math.round(dtQuy3*0.005*100)/100).toFixed(2).replace('.',',')+' tr';return`
   <button class="alertband" style="width:100%;text-align:left;background:#eef3f9;border-color:#cfe0f5" onclick="go('more','cod')">
     <span style="font-size:1.1rem">₫</span>
     <div style="flex:1;min-width:0"><b style="color:var(--accent-deep)">COD dự kiến về hôm nay: <span class="num">12,8 tr</span></b><small style="color:var(--ink2)">Đang lệch <b class="num" style="color:var(--critical)">1,27 tr</b> (3 vận đơn) — số thuế bên dưới tính trên tiền đã đối soát</small></div>
     <span style="color:var(--accent-deep);font-weight:800">Đối soát ›</span>
   </button>
   <div class="kchips">
-    <div class="kchip"><span class="lb">DT QUÝ 3 TỰ KÊ KHAI</span><div class="vl num">405 tr</div><span class="cx">đã tách dòng sàn</span></div>
-    <div class="kchip"><span class="lb">GTGT PHẢI NỘP (1%)</span><div class="vl num">4,05 tr</div><span class="cx">Luật GTGT 48/2024</span></div>
+    <div class="kchip"><span class="lb">DT QUÝ 3 TỰ KÊ KHAI</span><div class="vl num">${dtQuy3} tr</div><span class="cx">đã tách dòng sàn</span></div>
+    <div class="kchip"><span class="lb">GTGT PHẢI NỘP (1%)</span><div class="vl num">${gtgt}</div><span class="cx">Luật GTGT 48/2024</span></div>
     <div class="kchip"><span class="lb">SÀN ĐÃ KHẤU TRỪ</span><div class="vl num" style="color:var(--good-text)">1,23 tr</div><span class="cx">NĐ 117 · đối chiếu ✓</span></div>
   </div>
   <div class="card">
     <h3>Phương pháp nộp TNCN — hộ nhóm 2 được chọn</h3>
     <div class="row2">
-      <div class="winner"><div style="font-size:.7rem;font-weight:700;color:var(--good-text)">A · % DOANH THU ✓ đang tối ưu</div><div class="big num" style="font-size:1.3rem">2,03 tr</div><div style="font-size:.68rem;color:var(--ink2)">0,5% × 405 tr</div></div>
+      <div class="winner"><div style="font-size:.7rem;font-weight:700;color:var(--good-text)">A · % DOANH THU ✓ đang tối ưu</div><div class="big num" style="font-size:1.3rem">${tncnA}</div><div style="font-size:.68rem;color:var(--ink2)">0,5% × ${dtQuy3} tr</div></div>
       <div class="loser"><div style="font-size:.7rem;font-weight:700;color:var(--muted)">B · 15% LỢI NHUẬN</div><div class="big num" style="font-size:1.3rem">36,3 tr</div><div style="font-size:.68rem;color:var(--ink2)">phụ thuộc chứng từ</div></div>
     </div>
     <div class="callout">Doanh thu 12T đã 2,45 tỷ — gần mốc 3 tỷ (nhóm 3 bắt buộc 17% trên lợi nhuận). Mỗi chứng từ thiếu hôm nay là thuế nộp thêm khi đó. Mô phỏng chi tiết có trên bản máy tính.</div>
@@ -634,7 +634,7 @@ VIEW.tax={
     <div class="note" style="border:0;padding:0">Nhắc qua thông báo app + ZNS trước hạn 7 ngày và 1 ngày.</div>
   </div>
   <button class="btn block" style="margin-top:12px" onclick="chatSheet()">💬 Hỏi trợ lý thuế (có trích dẫn văn bản)</button>
-  <div class="note">Mô phỏng chỉ để tham khảo — kế toán xác nhận trước khi kê khai. Hệ thống không tự nộp tờ khai.</div>`
+  <div class="note">Mô phỏng chỉ để tham khảo — kế toán xác nhận trước khi kê khai. Hệ thống không tự nộp tờ khai.</div>`;}
 };
 function chatSheet(){openSheet(`<h2>Trợ lý thuế</h2>
   <div style="font-size:.7rem;color:var(--muted);margin-bottom:8px">Trả lời kèm căn cứ pháp lý + ngày hiệu lực · không thay thế tư vấn</div>
