@@ -299,6 +299,8 @@ const QA=[
  {q:'Tôi có phải dùng hóa đơn máy tính tiền không?',a:'Có — hộ bán lẻ doanh thu <b>từ 1 tỷ/năm</b> bắt buộc HĐĐT khởi tạo từ máy tính tiền. App xuất hóa đơn qua đối tác ngay khi chốt đơn (mẫu đang rà soát theo NĐ 254/2026).',c:'NĐ 254/2026/NĐ-CP (thay NĐ 70/2025 từ 01/07/2026)'},
  {q:'Bán trên TikTok Shop có phải kê khai lại không?',a:'Không kê khai lại phần sàn đã khấu trừ từ 01/07/2025 — chỉ đối chiếu chứng từ khấu trừ và kê khai phần tự bán.',c:'NĐ 117/2025/NĐ-CP'},
 ];
+const tikTokRevTr=82;/* doanh thu TikTok Shop T7 (tr) — NĐ 117, nguồn: donut CƠ CẤU DOANH THU */
+const sanKhauTruTr=Math.round(tikTokRevTr*0.015*100)/100;/* GTGT 1%+TNCN 0.5%=1.5% × tikTokRevTr */
 
 /* charts */
 function spark(vals,color,h){h=h||36;const w=150,mx=Math.max(...vals),mn=Math.min(...vals);
@@ -421,8 +423,8 @@ VIEW.home={
   <div class="card">
     <h3>Tách dòng doanh thu tháng 7 (NĐ 117)</h3>
     <div class="simline"><span>Tự bán — tự kê khai</span><b class="num">136 tr</b></div>
-    <div class="simline"><span>Qua sàn — đã khấu trừ tại nguồn</span><b class="num">82 tr</b></div>
-    <div class="simline"><span>Thuế sàn đã nộp hộ</span><b class="num" style="color:var(--good-text)">1,23 tr</b></div>
+    <div class="simline"><span>Qua sàn — đã khấu trừ tại nguồn</span><b class="num">${tikTokRevTr} tr</b></div>
+    <div class="simline"><span>Thuế sàn đã nộp hộ</span><b class="num" style="color:var(--good-text)">${sanKhauTruTr.toFixed(2).replace('.',',')} tr</b></div>
     <div class="note" style="border:0;margin-top:4px;padding:0">Không tính trùng phần sàn đã nộp thay — chi tiết trong tab Thuế.</div>
   </div>`;
  }
@@ -604,7 +606,7 @@ VIEW.tax={
   <div class="kchips">
     <div class="kchip"><span class="lb">DT QUÝ 3 TỰ KÊ KHAI</span><div class="vl num">405 tr</div><span class="cx">đã tách dòng sàn</span></div>
     <div class="kchip"><span class="lb">GTGT PHẢI NỘP (1%)</span><div class="vl num">4,05 tr</div><span class="cx">Luật GTGT 48/2024</span></div>
-    <div class="kchip"><span class="lb">SÀN ĐÃ KHẤU TRỪ</span><div class="vl num" style="color:var(--good-text)">1,23 tr</div><span class="cx">NĐ 117 · đối chiếu ✓</span></div>
+    <div class="kchip"><span class="lb">SÀN ĐÃ KHẤU TRỪ</span><div class="vl num" style="color:var(--good-text)">${sanKhauTruTr.toFixed(2).replace('.',',')} tr</div><span class="cx">NĐ 117 · đối chiếu ✓</span></div>
   </div>
   <div class="card">
     <h3>Phương pháp nộp TNCN — hộ nhóm 2 được chọn</h3>
@@ -770,7 +772,7 @@ SUB.stats={
     <div class="kchip"><span class="lb">GIAO LẦN ĐẦU</span><div class="vl num">85,2%</div><span class="cx" style="color:var(--good-text)">▲ +3,1 điểm</span></div>
   </div>
   <div class="card"><div class="eyebrow">DOANH THU THEO NGÀY (TRIỆU ₫)</div>${curveChart(daily,'#2a78d6')}<div class="note" style="border:0;padding:0">Lũy kế <b class="num">218,0 tr</b> · đỉnh ngày 21/07 (<b class="num">11,6 tr</b>)</div></div>
-  <div class="card"><div class="eyebrow">CƠ CẤU DOANH THU THEO NỀN TẢNG</div><div style="margin-top:8px">${donutMulti([['FB Live',96,'#2a78d6'],['TikTok Shop',82,'#eb6834'],['Zalo OA',28,'#1baf7a'],['Website',12,'#eda100']],126,'218','triệu ₫')}</div></div>
+  <div class="card"><div class="eyebrow">CƠ CẤU DOANH THU THEO NỀN TẢNG</div><div style="margin-top:8px">${donutMulti([['FB Live',96,'#2a78d6'],['TikTok Shop',tikTokRevTr,'#eb6834'],['Zalo OA',28,'#1baf7a'],['Website',12,'#eda100']],126,'218','triệu ₫')}</div></div>
   <div class="card"><div class="eyebrow">KẾT QUẢ GIAO · 742 ĐƠN</div><div style="margin-top:8px">${donutMulti([['Thành công',668,'#0ca30c'],['Hoàn về',62,'#ec835a'],['Hủy',12,'#6b6963']],126,'90%','thành công')}</div></div>
   <div class="card"><div class="eyebrow">ĐƠN THEO NGÀY TRONG TUẦN · 21–27/07</div>${colChart(['T2','T3','T4','T5','T6','T7','CN'],[18,22,25,19,27,31,29],'#2a78d6')}</div>
   <div class="card"><div class="eyebrow">ĐƠN THEO HÃNG VẬN CHUYỂN</div>${hbars([['BEST',512,'#c8102e'],['GHN',118,'#f96332'],['GHTK',84,'#00904a'],['J&T',28,'#d71618']])}</div>
