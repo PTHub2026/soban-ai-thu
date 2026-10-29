@@ -851,9 +851,12 @@ SUB.ncc={
 };
 SUB.benefit={
  bar:()=>bar('Báo cáo lợi ích','Chỉ tính lợi ích có bằng chứng','more'),
- body:()=>`
+ body:()=>{
+  const BENEFIT_ITEMS=[['Đơn cứu được',5.2,'#2a78d6','5,2tr'],['Phí hoàn tránh',1.54,'#2a78d6','1,54'],['COD thu hồi',1.2,'#2a78d6','1,2'],['Thời gian',0.8,'#2a78d6','0,8']];
+  const benefitTotalTr=Math.round(BENEFIT_ITEMS.reduce((s,x)=>s+x[1],0)*100)/100;/* tổng lợi ích đã kiểm chứng (tr) */
+  return `
   <div class="kchips">
-    <div class="kchip" style="min-width:170px"><span class="lb">ĐÃ KIỂM CHỨNG · TUẦN NÀY</span><div class="vl num" style="color:var(--good-text)">8,74 tr</div><span class="cx">gắn vận đơn/đối soát/duyệt</span></div>
+    <div class="kchip" style="min-width:170px"><span class="lb">ĐÃ KIỂM CHỨNG · TUẦN NÀY</span><div class="vl num" style="color:var(--good-text)">${benefitTotalTr.toFixed(2).replace('.',',')} tr</div><span class="cx">gắn vận đơn/đối soát/duyệt</span></div>
     <div class="kchip"><span class="lb">TIỀM NĂNG</span><div class="vl num" style="color:var(--muted)">3,1 tr</div><span class="cx">chưa cộng</span></div>
     <div class="kchip" style="min-width:170px"><span class="lb">LN BẢO VỆ / 1.000 ĐƠN</span><div class="vl num">6,47 tr</div><span class="cx" style="color:var(--good-text)">▲ +18%</span></div>
   </div>
@@ -867,8 +870,9 @@ SUB.benefit={
       return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${g}</svg>`;})()}
     <div class="note" style="border:0;padding:0">Chênh tuần 8: −1,8 điểm % · n = 412 đơn (đạt cỡ mẫu tối thiểu)</div></div>
   <div class="card"><div class="eyebrow">LỢI ÍCH THEO LOẠI · TUẦN 21–27/07</div>
-    ${hbars([['Đơn cứu được',5.2,'#2a78d6','5,2tr'],['Phí hoàn tránh',1.54,'#2a78d6','1,54'],['COD thu hồi',1.2,'#2a78d6','1,2'],['Thời gian',0.8,'#2a78d6','0,8']])}
-    <div class="note" style="border:0;padding:0">Đã trừ chi phí ưu đãi 240.000 ₫ + 25 tin ZNS (8.750 ₫)</div></div>`
+    ${hbars(BENEFIT_ITEMS)}
+    <div class="note" style="border:0;padding:0">Đã trừ chi phí ưu đãi 240.000 ₫ + 25 tin ZNS (8.750 ₫)</div></div>`;
+ }
 };
 SUB.setting={
  bar:()=>bar('Tài khoản & cài đặt','Mai Anh Boutique · Hộ nhóm 2','more'),
