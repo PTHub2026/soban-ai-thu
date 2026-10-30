@@ -392,6 +392,10 @@ VIEW.home={
   const q=RESCUE.filter(r=>!r.done).length;
   const top=RESCUE.filter(r=>!r.done).sort((a,b)=>b.gain-a.gain)[0];
   const dmin=DEADLINES.reduce((a,b)=>a.days<=b.days?a:b);
+  /* issue-41: tách dòng doanh thu tháng 7 — dùng hằng số thay vì literal */
+  const monthRevTr=218,tikTokRevTr=82;
+  const selfRevTr=monthRevTr-tikTokRevTr; /* 136 */
+  const sanKhauTruTr=Math.round(tikTokRevTr*0.015*100)/100; /* 1.23 */
   return `
   <button class="alertband" style="width:100%;text-align:left" onclick="openRuleSheet()">
     <span style="font-size:1.1rem">⚠</span><div style="flex:1"><b>1 quy định mới chờ duyệt — còn 3 ngày</b><small>NĐ 254/2026/NĐ-CP về hóa đơn · AI đã soạn đề xuất rule draft-08</small></div><span style="color:#7a5200;font-weight:800">›</span>
@@ -420,9 +424,9 @@ VIEW.home={
   </div>
   <div class="card">
     <h3>Tách dòng doanh thu tháng 7 (NĐ 117)</h3>
-    <div class="simline"><span>Tự bán — tự kê khai</span><b class="num">136 tr</b></div>
-    <div class="simline"><span>Qua sàn — đã khấu trừ tại nguồn</span><b class="num">82 tr</b></div>
-    <div class="simline"><span>Thuế sàn đã nộp hộ</span><b class="num" style="color:var(--good-text)">1,23 tr</b></div>
+    <div class="simline"><span>Tự bán — tự kê khai</span><b class="num">${selfRevTr} tr</b></div>
+    <div class="simline"><span>Qua sàn — đã khấu trừ tại nguồn</span><b class="num">${tikTokRevTr} tr</b></div>
+    <div class="simline"><span>Thuế sàn đã nộp hộ</span><b class="num" style="color:var(--good-text)">${sanKhauTruTr.toFixed(2).replace('.',',')} tr</b></div>
     <div class="note" style="border:0;margin-top:4px;padding:0">Không tính trùng phần sàn đã nộp thay — chi tiết trong tab Thuế.</div>
   </div>`;
  }
